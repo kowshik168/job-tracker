@@ -42,3 +42,10 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+export function daysSince(date: string | null | undefined): number {
+  if (!date) return 0;
+  const then = new Date(date).getTime();
+  const now = Date.now();
+  return Math.max(0, Math.floor((now - then) / (1000 * 60 * 60 * 24)));
+}

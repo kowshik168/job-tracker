@@ -116,6 +116,7 @@ export class ApplicationsService {
         recruiterContact: dto.recruiterContact,
         followUpDate: dto.followUpDate ? new Date(dto.followUpDate) : null,
         notes: dto.notes,
+        lastActivityAt: new Date(),
       },
       include: { resume: { select: resumeSelect } },
     });
@@ -152,6 +153,32 @@ export class ApplicationsService {
         dto.followUpDate === null ? null : new Date(dto.followUpDate);
     }
     if (dto.notes !== undefined) data.notes = dto.notes;
+
+    if (dto.noResponse === true) {
+      data.noResponseAt = new Date();
+    } else if (dto.noResponse === false) {
+      data.noResponseAt = null;
+      data.lastActivityAt = new Date();
+    }
+
+    const touchesActivity =
+      dto.company !== undefined ||
+      dto.role !== undefined ||
+      dto.status !== undefined ||
+      dto.currentRound !== undefined ||
+      dto.appliedAt !== undefined ||
+      dto.notes !== undefined ||
+      dto.resumeId !== undefined ||
+      dto.resumeType !== undefined ||
+      dto.source !== undefined ||
+      dto.followUpDate !== undefined;
+
+    if (touchesActivity) {
+      data.lastActivityAt = new Date();
+      if (dto.status !== undefined) {
+        data.noResponseAt = null;
+      }
+    }
 
     return this.prisma.application.update({
       where: { id },

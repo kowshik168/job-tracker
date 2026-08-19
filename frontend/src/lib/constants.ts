@@ -72,3 +72,5 @@ export const CHART_COLORS = [
   '#64748b',
   '#db2777',
 ];
+
+export const STALE_AFTER_DAYS = 15;

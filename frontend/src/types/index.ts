@@ -93,6 +93,8 @@ export interface Application {
   recruiterContact: string | null;
   followUpDate: string | null;
   notes: string | null;
+  lastActivityAt: string;
+  noResponseAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -116,6 +118,7 @@ export interface CreateApplicationInput {
 
 export type UpdateApplicationInput = Partial<CreateApplicationInput> & {
   followUpDate?: string | null;
+  noResponse?: boolean;
 };
 
 export interface PaginatedResponse<T> {
@@ -135,6 +138,10 @@ export interface DashboardStats {
   interviews: number;
   offers: number;
   rejections: number;
+  needsAction: number;
+  noResponse: number;
+  noResponseRate: number;
+  staleAfterDays: number;
 }
 
 export interface StatusBreakdownItem {
@@ -156,6 +163,12 @@ export interface FollowUpsResponse {
   dueToday: Application[];
   overdue: Application[];
   upcoming: Application[];
+}
+
+export interface AttentionResponse {
+  needsAction: Application[];
+  noResponse: Application[];
+  staleAfterDays: number;
 }
 
 export interface ApiError {

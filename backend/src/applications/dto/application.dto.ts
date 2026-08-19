@@ -1,10 +1,11 @@
 import {
-  IsString,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
-  IsEnum,
+  IsString,
   IsUrl,
-  IsDateString,
   MaxLength,
 } from 'class-validator';
 import {
@@ -139,4 +140,8 @@ export class UpdateApplicationDto {
   @IsString()
   @MaxLength(5000)
   notes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  noResponse?: boolean;
 }

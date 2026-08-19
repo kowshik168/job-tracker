@@ -9,6 +9,7 @@ import { ApplicationsPage } from './pages/ApplicationsPage';
 import { ApplicationDetailPage } from './pages/ApplicationDetailPage';
 import { NewApplicationPage } from './pages/NewApplicationPage';
 import { EditApplicationPage } from './pages/EditApplicationPage';
+import { NeedsActionPage } from './pages/NeedsActionPage';
 import { FollowUpsPage } from './pages/FollowUpsPage';
 import { ResumesPage } from './pages/ResumesPage';
 import { ResumeDetailPage } from './pages/ResumeDetailPage';
@@ -34,6 +35,7 @@ export default function App() {
                   path="applications/:id/edit"
                   element={<EditApplicationPage />}
                 />
+                <Route path="needs-action" element={<NeedsActionPage />} />
                 <Route path="follow-ups" element={<FollowUpsPage />} />
                 <Route path="resumes" element={<ResumesPage />} />
                 <Route path="resumes/:id" element={<ResumeDetailPage />} />

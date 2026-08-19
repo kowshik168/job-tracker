@@ -29,4 +29,9 @@ export class DashboardController {
   getFollowUps() {
     return this.dashboardService.getFollowUps();
   }
+
+  @Get('attention')
+  getAttention() {
+    return this.dashboardService.getAttention();
+  }
 }

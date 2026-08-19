@@ -28,6 +28,8 @@ export class DashboardService {
   async getStats() {
     const now = new Date();
     const weekStart = startOfWeek(now);
+    const staleCutoff = new Date(now);
+    staleCutoff.setDate(staleCutoff.getDate() - 15);
 
     const [
       totalApplications,
@@ -36,6 +38,8 @@ export class DashboardService {
       interviews,
       offers,
       rejections,
+      needsAction,
+      noResponse,
     ] = await Promise.all([
       this.prisma.application.count(),
       this.prisma.application.count({
@@ -45,7 +49,24 @@ export class DashboardService {
       this.prisma.application.count({ where: { status: 'INTERVIEW' } }),
       this.prisma.application.count({ where: { status: 'OFFER' } }),
       this.prisma.application.count({ where: { status: 'REJECTED' } }),
+      this.prisma.application.count({
+        where: {
+          lastActivityAt: { lte: staleCutoff },
+          noResponseAt: null,
+          status: { notIn: ['OFFER', 'REJECTED'] },
+        },
+      }),
+      this.prisma.application.count({
+        where: {
+          noResponseAt: { not: null },
+          status: { notIn: ['OFFER', 'REJECTED'] },
+        },
+      }),
     ]);
+
+    const openCount = Math.max(totalApplications - offers - rejections, 0);
+    const noResponseRate =
+      openCount === 0 ? 0 : Math.round((noResponse / openCount) * 100);
 
     return {
       totalApplications,
@@ -54,6 +75,10 @@ export class DashboardService {
       interviews,
       offers,
       rejections,
+      needsAction,
+      noResponse,
+      noResponseRate,
+      staleAfterDays: 15,
     };
   }
 
@@ -129,5 +154,42 @@ export class DashboardService {
     });
 
     return { dueToday, overdue, upcoming };
+  }
+
+  async getAttention() {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 15);
+
+    const resumeSelect = {
+      id: true,
+      name: true,
+      resumeType: true,
+      fileName: true,
+      fileSize: true,
+    } as const;
+
+    const openStatuses: Array<'OFFER' | 'REJECTED'> = ['OFFER', 'REJECTED'];
+
+    const [needsAction, noResponse] = await Promise.all([
+      this.prisma.application.findMany({
+        where: {
+          lastActivityAt: { lte: cutoff },
+          noResponseAt: null,
+          status: { notIn: openStatuses },
+        },
+        orderBy: { lastActivityAt: 'asc' },
+        include: { resume: { select: resumeSelect } },
+      }),
+      this.prisma.application.findMany({
+        where: {
+          noResponseAt: { not: null },
+          status: { notIn: openStatuses },
+        },
+        orderBy: { noResponseAt: 'asc' },
+        include: { resume: { select: resumeSelect } },
+      }),
+    ]);
+
+    return { needsAction, noResponse, staleAfterDays: 15 };
   }
 }

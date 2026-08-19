@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
+  AlertTriangle,
   Briefcase,
   Calendar,
   CheckCircle,
   Clock,
+  Inbox,
   TrendingUp,
   XCircle,
 } from 'lucide-react';
@@ -27,6 +30,7 @@ import {
   getResumeTypeBreakdown,
   getApplicationTrend,
   getFollowUps,
+  getAttention,
 } from '../api/dashboard';
 import { PageLoader, ErrorState } from '../components/ui/States';
 import { FollowUpList } from '../components/followups/FollowUpList';
@@ -42,6 +46,7 @@ import type {
   ResumeTypeBreakdownItem,
   ApplicationTrendItem,
   FollowUpsResponse,
+  AttentionResponse,
 } from '../types';
 
 function StatCard({
@@ -80,6 +85,7 @@ export function DashboardPage() {
   >([]);
   const [trend, setTrend] = useState<ApplicationTrendItem[]>([]);
   const [followUps, setFollowUps] = useState<FollowUpsResponse | null>(null);
+  const [attention, setAttention] = useState<AttentionResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,18 +93,20 @@ export function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [s, status, resume, t, f] = await Promise.all([
+      const [s, status, resume, t, f, a] = await Promise.all([
         getDashboardStats(),
         getStatusBreakdown(),
         getResumeTypeBreakdown(),
         getApplicationTrend(),
         getFollowUps(),
+        getAttention(),
       ]);
       setStats(s);
       setStatusBreakdown(status);
       setResumeBreakdown(resume);
       setTrend(t);
       setFollowUps(f);
+      setAttention(a);
     } catch (err) {
       setError(getErrorMessage(err, 'Could not load the dashboard. Please try again.'));
     } finally {
@@ -112,7 +120,7 @@ export function DashboardPage() {
 
   if (loading) return <PageLoader />;
   if (error) return <ErrorState message={error} onRetry={load} />;
-  if (!stats || !followUps) return null;
+  if (!stats || !followUps || !attention) return null;
 
   const statusChartData = statusBreakdown.map((item) => ({
     name: STATUS_LABELS[item.status],
@@ -133,7 +141,7 @@ export function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Total Applications"
           value={stats.totalApplications}
@@ -170,7 +178,57 @@ export function DashboardPage() {
           icon={XCircle}
           color="bg-red-50 text-red-600"
         />
+        <StatCard
+          label={`Quiet ${stats.staleAfterDays}+ days`}
+          value={stats.needsAction}
+          icon={AlertTriangle}
+          color="bg-orange-50 text-orange-600"
+        />
+        <StatCard
+          label="No response"
+          value={stats.noResponse}
+          icon={Inbox}
+          color="bg-slate-200 text-slate-700"
+        />
       </div>
+
+      {(stats.needsAction > 0 || stats.noResponse > 0) && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h2 className="text-lg font-semibold text-amber-900">
+              Needs action
+            </h2>
+            <Link
+              to="/needs-action"
+              className="text-sm font-medium text-amber-800 hover:text-amber-900"
+            >
+              Open list
+            </Link>
+          </div>
+          <p className="text-sm text-amber-900/80 mb-3">
+            {stats.needsAction} application
+            {stats.needsAction === 1 ? '' : 's'} with no update for{' '}
+            {stats.staleAfterDays}+ days. {stats.noResponse} marked as no
+            response
+            {stats.noResponseRate > 0
+              ? ` (${stats.noResponseRate}% of open apps)`
+              : ''}
+            .
+          </p>
+          <ul className="space-y-1">
+            {attention.needsAction.slice(0, 4).map((app) => (
+              <li key={app.id}>
+                <Link
+                  to={`/applications/${app.id}`}
+                  className="text-sm text-slate-800 hover:text-blue-700"
+                >
+                  {app.company} — {app.role}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-slate-200 bg-surface p-5">

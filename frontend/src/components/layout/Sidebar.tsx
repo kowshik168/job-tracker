@@ -9,6 +9,7 @@ import {
   Plus,
   LogOut,
   FileText,
+  Inbox,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
@@ -20,6 +21,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/applications', label: 'Applications', icon: Briefcase },
   { to: '/resumes', label: 'Resumes', icon: FileText },
+  { to: '/needs-action', label: 'Needs action', icon: Inbox },
   { to: '/follow-ups', label: 'Follow-ups', icon: Bell },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];

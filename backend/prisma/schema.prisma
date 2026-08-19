@@ -65,6 +65,8 @@ model Application {
   recruiterContact String?
   followUpDate     DateTime?
   notes            String?
+  lastActivityAt   DateTime          @default(now())
+  noResponseAt     DateTime?
   learnings        ResumeLearning[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -74,6 +76,8 @@ model Application {
   @@index([followUpDate])
   @@index([company])
   @@index([resumeId])
+  @@index([lastActivityAt])
+  @@index([noResponseAt])
   @@map("applications")
 }
 

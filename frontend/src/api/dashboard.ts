@@ -1,6 +1,7 @@
 import { apiGet } from './client';
 import type {
   ApplicationTrendItem,
+  AttentionResponse,
   DashboardStats,
   FollowUpsResponse,
   ResumeTypeBreakdownItem,
@@ -25,4 +26,8 @@ export function getApplicationTrend() {
 
 export function getFollowUps() {
   return apiGet<FollowUpsResponse>('/dashboard/follow-ups');
+}
+
+export function getAttention() {
+  return apiGet<AttentionResponse>('/dashboard/attention');
 }
