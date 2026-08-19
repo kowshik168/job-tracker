@@ -163,7 +163,7 @@ export function ResumeDetailPage() {
 
       <form
         onSubmit={handleSave}
-        className="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
+        className="rounded-xl border border-slate-200 bg-surface p-6 space-y-4"
       >
         <h2 className="text-sm font-semibold text-slate-900">Details</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -198,7 +198,7 @@ export function ResumeDetailPage() {
         </div>
       </form>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-surface p-6 space-y-4">
         <h2 className="text-sm font-semibold text-slate-900">
           Learnings from rejections
         </h2>
@@ -262,7 +262,7 @@ export function ResumeDetailPage() {
         )}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 bg-surface p-6">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
           Applications using this resume
         </h2>

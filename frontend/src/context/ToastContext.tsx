@@ -47,8 +47,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={cn(
               'flex items-center gap-3 rounded-lg border px-4 py-3 shadow-lg min-w-[280px] max-w-sm animate-in slide-in-from-right',
               toast.type === 'success'
-                ? 'bg-white border-emerald-200 text-emerald-800'
-                : 'bg-white border-red-200 text-red-800',
+                ? 'bg-surface border-emerald-200 text-emerald-800'
+                : 'bg-surface border-red-200 text-red-800',
             )}
           >
             {toast.type === 'success' ? (

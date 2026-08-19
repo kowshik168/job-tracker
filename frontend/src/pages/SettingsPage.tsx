@@ -20,7 +20,7 @@ export function SettingsPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-surface p-6 space-y-4">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">About</h2>
           <p className="mt-2 text-sm text-slate-600">

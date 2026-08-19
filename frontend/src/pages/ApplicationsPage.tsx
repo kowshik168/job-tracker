@@ -108,7 +108,7 @@ export function ApplicationsPage() {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-surface p-4 space-y-4">
         <form onSubmit={handleSearch} className="flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -117,7 +117,7 @@ export function ApplicationsPage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by company or role..."
-              className="w-full rounded-lg border border-slate-200 pl-10 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="w-full rounded-lg border border-slate-200 bg-raised pl-10 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
           <Button type="submit" variant="secondary">
@@ -199,7 +199,7 @@ export function ApplicationsPage() {
         />
       ) : (
         <>
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div className="rounded-xl border border-slate-200 bg-surface overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

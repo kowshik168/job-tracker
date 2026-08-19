@@ -31,7 +31,7 @@ export function Modal({
       />
       <div
         className={cn(
-          'relative w-full max-w-md rounded-xl bg-white shadow-xl border border-slate-200',
+          'relative w-full max-w-md rounded-xl bg-surface shadow-xl border border-slate-200',
           className,
         )}
         role="dialog"

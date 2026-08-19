@@ -56,7 +56,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-slate-200 bg-surface p-5">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
@@ -173,7 +173,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="rounded-xl border border-slate-200 bg-surface p-5">
           <h3 className="text-sm font-semibold text-slate-900 mb-4">
             Status Breakdown
           </h3>
@@ -201,7 +201,7 @@ export function DashboardPage() {
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="rounded-xl border border-slate-200 bg-surface p-5">
           <h3 className="text-sm font-semibold text-slate-900 mb-4">
             Applications by Resume Type
           </h3>
@@ -228,7 +228,7 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="rounded-xl border border-slate-200 bg-surface p-5">
         <h3 className="text-sm font-semibold text-slate-900 mb-4">
           Applications Over Time
         </h3>

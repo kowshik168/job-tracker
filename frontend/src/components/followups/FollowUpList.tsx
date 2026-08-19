@@ -18,7 +18,7 @@ export function FollowUpList({
   emptyMessage = 'None',
 }: FollowUpListProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-slate-200 bg-surface p-5">
       <h3
         className={cn(
           'text-sm font-semibold mb-3 flex items-center gap-2',

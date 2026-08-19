@@ -53,7 +53,7 @@ export function EditApplicationPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 bg-surface p-6">
         <ApplicationForm
           initial={application}
           onSubmit={(data) => handleSubmit(data)}

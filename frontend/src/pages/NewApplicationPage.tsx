@@ -32,7 +32,7 @@ export function NewApplicationPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 bg-surface p-6">
         <ApplicationForm
           onSubmit={handleSubmit}
           onCancel={() => navigate('/applications')}

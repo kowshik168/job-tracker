@@ -104,7 +104,7 @@ export function ResumesPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 bg-surface p-6">
         <h2 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Upload resume
@@ -134,7 +134,7 @@ export function ResumesPage() {
               type="file"
               accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-200 bg-raised px-3 py-2 text-sm"
             />
             <p className="text-xs text-slate-400">PDF or Word, up to 5 MB</p>
           </div>
@@ -167,7 +167,7 @@ export function ResumesPage() {
           {resumes.map((resume) => (
             <div
               key={resume.id}
-              className="rounded-xl border border-slate-200 bg-white p-5"
+              className="rounded-xl border border-slate-200 bg-surface p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">

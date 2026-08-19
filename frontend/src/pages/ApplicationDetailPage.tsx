@@ -197,7 +197,7 @@ export function ApplicationDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6">
+        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-surface p-6">
           <h2 className="text-sm font-semibold text-slate-900 mb-4">Details</h2>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {detailRows.map(({ label, value }) => (
@@ -266,7 +266,7 @@ export function ApplicationDetailPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+          <div className="rounded-xl border border-slate-200 bg-surface p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900">
               Quick Actions
             </h2>
@@ -296,7 +296,7 @@ export function ApplicationDetailPage() {
             />
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 text-xs text-slate-400">
+          <div className="rounded-xl border border-slate-200 bg-surface p-5 text-xs text-slate-400">
             <p>Created: {formatDate(application.createdAt)}</p>
             <p className="mt-1">Updated: {formatDate(application.updatedAt)}</p>
           </div>

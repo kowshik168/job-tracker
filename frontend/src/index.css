@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #f8fafc;
-  --color-surface: #ffffff;
-  --color-border: #e2e8f0;
+  --color-canvas: #e8e4dc;
+  --color-surface: #f3f0e9;
+  --color-raised: #faf8f3;
+  --color-border: #d8d3c8;
   --color-muted: #64748b;
-  --color-foreground: #0f172a;
+  --color-foreground: #1c1917;
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
   --color-danger: #dc2626;
@@ -21,13 +22,14 @@
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: var(--color-background);
+  background: var(--color-canvas);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100vh;
+  background: var(--color-canvas);
 }
 
 input,
