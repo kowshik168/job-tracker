@@ -4,6 +4,7 @@ import { getApplication, updateApplication } from '../api/applications';
 import { ApplicationForm } from '../components/applications/ApplicationForm';
 import { PageLoader, ErrorState } from '../components/ui/States';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../lib/errors';
 import type { Application, CreateApplicationInput } from '../types';
 
 export function EditApplicationPage() {
@@ -19,7 +20,7 @@ export function EditApplicationPage() {
     getApplication(id)
       .then(setApplication)
       .catch((err) =>
-        setError(err instanceof Error ? err.message : 'Failed to load'),
+        setError(getErrorMessage(err, 'Could not load this application.')),
       )
       .finally(() => setLoading(false));
   }, [id]);
@@ -32,7 +33,7 @@ export function EditApplicationPage() {
       navigate(`/applications/${id}`);
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Failed to update application',
+        getErrorMessage(err, 'Could not save your changes. Please try again.'),
         'error',
       );
       throw err;

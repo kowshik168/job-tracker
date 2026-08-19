@@ -16,6 +16,7 @@ import {
   CURRENT_ROUND_LABELS,
 } from '../lib/constants';
 import { formatDate } from '../lib/utils';
+import { getErrorMessage } from '../lib/errors';
 import type { Application, ApplicationQueryParams } from '../types';
 
 export function ApplicationsPage() {
@@ -68,7 +69,7 @@ export function ApplicationsPage() {
       setTotal(result.meta.total);
       setTotalPages(result.meta.totalPages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load applications');
+      setError(getErrorMessage(err, 'Could not load applications. Please try again.'));
     } finally {
       setLoading(false);
     }

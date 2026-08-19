@@ -35,6 +35,7 @@ import {
   RESUME_TYPE_LABELS,
   CHART_COLORS,
 } from '../lib/constants';
+import { getErrorMessage } from '../lib/errors';
 import type {
   DashboardStats,
   StatusBreakdownItem,
@@ -99,7 +100,7 @@ export function DashboardPage() {
       setTrend(t);
       setFollowUps(f);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard');
+      setError(getErrorMessage(err, 'Could not load the dashboard. Please try again.'));
     } finally {
       setLoading(false);
     }

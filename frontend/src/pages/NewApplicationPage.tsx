@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { createApplication } from '../api/applications';
 import { ApplicationForm } from '../components/applications/ApplicationForm';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../lib/errors';
 import type { CreateApplicationInput } from '../types';
 
 export function NewApplicationPage() {
@@ -15,7 +16,7 @@ export function NewApplicationPage() {
       navigate('/applications');
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Failed to create application',
+        getErrorMessage(err, 'Could not add the application. Please try again.'),
         'error',
       );
       throw err;

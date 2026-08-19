@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { Briefcase } from 'lucide-react';
+import { AlertCircle, Briefcase } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { ApiRequestError } from '../api/client';
+import { getErrorMessage } from '../lib/errors';
 
 export function LoginPage() {
   const { isAuthenticated, isLoading, login } = useAuth();
@@ -13,7 +13,11 @@ export function LoginPage() {
     ?.pathname ?? '/';
 
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() => {
+    const notice = sessionStorage.getItem('job_tracker_auth_notice');
+    if (notice) sessionStorage.removeItem('job_tracker_auth_notice');
+    return notice ?? '';
+  });
   const [submitting, setSubmitting] = useState(false);
 
   if (isLoading) return null;
@@ -21,17 +25,22 @@ export function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const trimmed = password.trim();
+
+    if (!trimmed) {
+      setError('Please enter your password.');
+      return;
+    }
+
     setError('');
     setSubmitting(true);
 
     try {
-      await login(password);
+      await login(trimmed);
     } catch (err) {
-      if (err instanceof ApiRequestError) {
-        setError(err.messages[0] ?? 'Invalid password');
-      } else {
-        setError('Unable to sign in. Please try again.');
-      }
+      setError(
+        getErrorMessage(err, 'The password you entered is incorrect.'),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -56,16 +65,22 @@ export function LoginPage() {
               label="Password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError('');
+              }}
               placeholder="Enter your password"
-              required
               autoFocus
             />
 
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                {error}
-              </p>
+              <div
+                role="alert"
+                className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <p>{error}</p>
+              </div>
             )}
 
             <Button type="submit" className="w-full" disabled={submitting}>

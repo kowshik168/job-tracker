@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getFollowUps } from '../api/dashboard';
 import { FollowUpRow } from '../components/followups/FollowUpList';
 import { PageLoader, ErrorState, EmptyState } from '../components/ui/States';
+import { getErrorMessage } from '../lib/errors';
 import type { FollowUpsResponse } from '../types';
 
 export function FollowUpsPage() {
@@ -16,7 +17,7 @@ export function FollowUpsPage() {
       const data = await getFollowUps();
       setFollowUps(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load follow-ups');
+      setError(getErrorMessage(err, 'Could not load follow-ups. Please try again.'));
     } finally {
       setLoading(false);
     }

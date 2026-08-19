@@ -11,19 +11,28 @@ export class AuthService {
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
     if (!adminPassword && !adminPasswordHash) {
-      throw new UnauthorizedException('Authentication is not configured');
+      throw new UnauthorizedException(
+        'Sign-in is not configured on the server. Set ADMIN_PASSWORD and try again.',
+      );
+    }
+
+    const trimmed = password?.trim() ?? '';
+    if (!trimmed) {
+      throw new UnauthorizedException('Please enter your password.');
     }
 
     let valid = false;
 
     if (adminPasswordHash) {
-      valid = await bcrypt.compare(password, adminPasswordHash);
+      valid = await bcrypt.compare(trimmed, adminPasswordHash);
     } else if (adminPassword) {
-      valid = password === adminPassword;
+      valid = trimmed === adminPassword;
     }
 
     if (!valid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException(
+        'The password you entered is incorrect.',
+      );
     }
 
     const payload = { sub: 'admin' };

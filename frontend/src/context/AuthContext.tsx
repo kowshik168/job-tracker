@@ -33,6 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
 
     setUnauthorizedHandler(() => {
+      sessionStorage.setItem(
+        'job_tracker_auth_notice',
+        'Your session has expired. Please sign in again.',
+      );
       clearToken();
       setIsAuthenticated(false);
     });

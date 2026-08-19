@@ -20,8 +20,24 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (response.status === 401 && onUnauthorized) {
+async function fetchJson<T>(
+  url: string,
+  init: RequestInit,
+  options?: { skipUnauthorized?: boolean },
+): Promise<T> {
+  let response: Response;
+
+  try {
+    response = await fetch(url, init);
+  } catch {
+    throw new TypeError('Failed to fetch');
+  }
+
+  if (
+    response.status === 401 &&
+    onUnauthorized &&
+    !options?.skipUnauthorized
+  ) {
     onUnauthorized();
   }
 
@@ -29,7 +45,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
     let messages = [`Request failed with status ${response.status}`];
     try {
       const error = (await response.json()) as ApiError;
-      if (error.message) messages = error.message;
+      if (error.message) {
+        messages = Array.isArray(error.message)
+          ? error.message
+          : [error.message];
+      }
     } catch {
       // ignore parse errors
     }
@@ -68,10 +88,7 @@ export async function apiGet<T>(
     });
   }
 
-  const response = await fetch(url.toString(), {
-    headers: buildHeaders(),
-  });
-  return handleResponse<T>(response);
+  return fetchJson<T>(url.toString(), { headers: buildHeaders() });
 }
 
 export async function apiPost<T, B = unknown>(
@@ -79,33 +96,35 @@ export async function apiPost<T, B = unknown>(
   body: B,
   options?: { auth?: boolean },
 ): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
-    headers: buildHeaders(
-      { 'Content-Type': 'application/json' },
-      options?.auth !== false,
-    ),
-    body: JSON.stringify(body),
-  });
-  return handleResponse<T>(response);
+  const skipUnauthorized = options?.auth === false;
+  return fetchJson<T>(
+    `${API_BASE}${path}`,
+    {
+      method: 'POST',
+      headers: buildHeaders(
+        { 'Content-Type': 'application/json' },
+        !skipUnauthorized,
+      ),
+      body: JSON.stringify(body),
+    },
+    { skipUnauthorized },
+  );
 }
 
 export async function apiPatch<T, B = unknown>(
   path: string,
   body: B,
 ): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  return fetchJson<T>(`${API_BASE}${path}`, {
     method: 'PATCH',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
-  return handleResponse<T>(response);
 }
 
 export async function apiDelete<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  return fetchJson<T>(`${API_BASE}${path}`, {
     method: 'DELETE',
     headers: buildHeaders(),
   });
-  return handleResponse<T>(response);
 }

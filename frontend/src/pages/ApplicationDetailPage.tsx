@@ -26,6 +26,7 @@ import {
   SOURCE_LABELS,
 } from '../lib/constants';
 import { formatDate } from '../lib/utils';
+import { getErrorMessage } from '../lib/errors';
 import type { Application, ApplicationStatus, CurrentRound } from '../types';
 
 export function ApplicationDetailPage() {
@@ -48,7 +49,7 @@ export function ApplicationDetailPage() {
       const data = await getApplication(id);
       setApplication(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load application');
+      setError(getErrorMessage(err, 'Could not load this application.'));
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export function ApplicationDetailPage() {
       showToast('Status updated');
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Failed to update status',
+        getErrorMessage(err, 'Could not update the status. Please try again.'),
         'error',
       );
     } finally {
@@ -84,7 +85,7 @@ export function ApplicationDetailPage() {
       showToast('Current round updated');
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Failed to update round',
+        getErrorMessage(err, 'Could not update the current round. Please try again.'),
         'error',
       );
     } finally {
@@ -101,7 +102,7 @@ export function ApplicationDetailPage() {
       navigate('/applications');
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Failed to delete',
+        getErrorMessage(err, 'Could not delete this application. Please try again.'),
         'error',
       );
       setDeleting(false);
