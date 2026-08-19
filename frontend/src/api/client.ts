@@ -128,3 +128,11 @@ export async function apiDelete<T>(path: string): Promise<T> {
     headers: buildHeaders(),
   });
 }
+
+export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  return fetchJson<T>(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: formData,
+  });
+}

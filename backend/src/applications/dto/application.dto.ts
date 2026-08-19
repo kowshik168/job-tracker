@@ -41,6 +41,10 @@ export class CreateApplicationDto {
   @MaxLength(200)
   referral?: string;
 
+  @IsOptional()
+  @IsString()
+  resumeId?: string;
+
   @IsEnum(ResumeType)
   resumeType!: ResumeType;
 
@@ -100,6 +104,10 @@ export class UpdateApplicationDto {
   @IsString()
   @MaxLength(200)
   referral?: string;
+
+  @IsOptional()
+  @IsString()
+  resumeId?: string | null;
 
   @IsOptional()
   @IsEnum(ResumeType)

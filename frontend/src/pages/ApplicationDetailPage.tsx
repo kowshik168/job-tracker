@@ -11,8 +11,10 @@ import {
   updateApplication,
   deleteApplication,
 } from '../api/applications';
+import { addResumeLearning } from '../api/resumes';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
+import { Textarea } from '../components/ui/Textarea';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { ConfirmDialog } from '../components/ui/Modal';
 import { PageLoader, ErrorState } from '../components/ui/States';
@@ -40,6 +42,8 @@ export function ApplicationDetailPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [learning, setLearning] = useState('');
+  const [savingLearning, setSavingLearning] = useState(false);
 
   const load = async () => {
     if (!id) return;
@@ -109,6 +113,26 @@ export function ApplicationDetailPage() {
     }
   };
 
+  const handleAddLearning = async () => {
+    if (!application?.resumeId || !learning.trim()) {
+      showToast('Write what this resume got wrong or missed.', 'error');
+      return;
+    }
+    setSavingLearning(true);
+    try {
+      await addResumeLearning(application.resumeId, {
+        content: learning.trim(),
+        applicationId: application.id,
+      });
+      setLearning('');
+      showToast('Learning saved on this resume');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Could not save learning.'), 'error');
+    } finally {
+      setSavingLearning(false);
+    }
+  };
+
   if (loading) return <PageLoader />;
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (!application) return null;
@@ -117,6 +141,10 @@ export function ApplicationDetailPage() {
     { label: 'Company', value: application.company },
     { label: 'Role', value: application.role },
     { label: 'Resume Type', value: RESUME_TYPE_LABELS[application.resumeType] },
+    {
+      label: 'Resume used',
+      value: application.resume?.name ?? 'Not attached',
+    },
     { label: 'Applied Date', value: formatDate(application.appliedAt) },
     { label: 'Source', value: application.source ? SOURCE_LABELS[application.source] : '—' },
     { label: 'Referral', value: application.referral ?? '—' },
@@ -192,6 +220,49 @@ export function ApplicationDetailPage() {
               </p>
             </div>
           )}
+
+          <div className="mt-6 pt-6 border-t border-slate-100 space-y-3">
+            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+              Resume learning
+            </h3>
+            {application.resume ? (
+              <>
+                <p className="text-sm text-slate-600">
+                  Used{' '}
+                  <Link
+                    to={`/resumes/${application.resume.id}`}
+                    className="font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    {application.resume.name}
+                  </Link>
+                  . If this one was rejected, capture what to fix on that
+                  resume.
+                </p>
+                <Textarea
+                  value={learning}
+                  onChange={(e) => setLearning(e.target.value)}
+                  placeholder="e.g. Not enough backend metrics; DSA section looked weak..."
+                  rows={3}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleAddLearning}
+                  disabled={savingLearning}
+                >
+                  {savingLearning ? 'Saving...' : 'Save learning to resume'}
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-slate-500">
+                No stored resume attached.{' '}
+                <Link to="/resumes" className="text-blue-600 hover:text-blue-700">
+                  Upload one
+                </Link>{' '}
+                and edit this application to link it.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">

@@ -10,6 +10,8 @@ import { ApplicationDetailPage } from './pages/ApplicationDetailPage';
 import { NewApplicationPage } from './pages/NewApplicationPage';
 import { EditApplicationPage } from './pages/EditApplicationPage';
 import { FollowUpsPage } from './pages/FollowUpsPage';
+import { ResumesPage } from './pages/ResumesPage';
+import { ResumeDetailPage } from './pages/ResumeDetailPage';
 import { SettingsPage } from './pages/SettingsPage';
 
 export default function App() {
@@ -33,6 +35,8 @@ export default function App() {
                   element={<EditApplicationPage />}
                 />
                 <Route path="follow-ups" element={<FollowUpsPage />} />
+                <Route path="resumes" element={<ResumesPage />} />
+                <Route path="resumes/:id" element={<ResumeDetailPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>

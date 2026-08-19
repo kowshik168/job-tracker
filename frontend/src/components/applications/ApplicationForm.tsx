@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Textarea } from '../ui/Textarea';
@@ -14,11 +15,14 @@ import {
   CURRENT_ROUND_LABELS,
 } from '../../lib/constants';
 import { toDateInputValue } from '../../lib/utils';
+import { getResumes } from '../../api/resumes';
 import type {
   Application,
   ApplicationStatus,
   CreateApplicationInput,
   CurrentRound,
+  Resume,
+  ResumeType,
 } from '../../types';
 
 interface ApplicationFormProps {
@@ -46,6 +50,8 @@ export function ApplicationForm({
   const [source, setSource] = useState(initial?.source ?? '');
   const [referral, setReferral] = useState(initial?.referral ?? '');
   const [resumeType, setResumeType] = useState(initial?.resumeType ?? '');
+  const [resumeId, setResumeId] = useState(initial?.resumeId ?? initial?.resume?.id ?? '');
+  const [resumes, setResumes] = useState<Resume[]>([]);
   const [status, setStatus] = useState<ApplicationStatus>(
     initial?.status ?? 'APPLIED',
   );
@@ -60,6 +66,12 @@ export function ApplicationForm({
     toDateInputValue(initial?.followUpDate),
   );
   const [notes, setNotes] = useState(initial?.notes ?? '');
+
+  useEffect(() => {
+    getResumes()
+      .then(setResumes)
+      .catch(() => setResumes([]));
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -86,6 +98,7 @@ export function ApplicationForm({
         role: role.trim(),
         appliedAt,
         resumeType: resumeType as CreateApplicationInput['resumeType'],
+        resumeId: resumeId || undefined,
         status: status as CreateApplicationInput['status'],
         currentRound: currentRound as CreateApplicationInput['currentRound'],
         jobUrl: jobUrl.trim() || undefined,
@@ -141,9 +154,24 @@ export function ApplicationForm({
           }))}
         />
         <Select
+          label="Stored resume"
+          value={resumeId}
+          onChange={(e) => {
+            const nextId = e.target.value;
+            setResumeId(nextId);
+            const selected = resumes.find((r) => r.id === nextId);
+            if (selected) setResumeType(selected.resumeType);
+          }}
+          placeholder="None — type only"
+          options={resumes.map((r) => ({
+            value: r.id,
+            label: `${r.name} (${RESUME_TYPE_LABELS[r.resumeType]})`,
+          }))}
+        />
+        <Select
           label="Resume Type"
           value={resumeType}
-          onChange={(e) => setResumeType(e.target.value)}
+          onChange={(e) => setResumeType(e.target.value as ResumeType)}
           error={errors.resumeType}
           required
           placeholder="Select resume type"
@@ -152,6 +180,15 @@ export function ApplicationForm({
             label: RESUME_TYPE_LABELS[r],
           }))}
         />
+        {resumes.length === 0 && (
+          <p className="sm:col-span-2 -mt-3 text-xs text-slate-500">
+            No stored resumes yet.{' '}
+            <Link to="/resumes" className="text-blue-600 hover:text-blue-700">
+              Upload one
+            </Link>{' '}
+            to attach the exact file you applied with.
+          </p>
+        )}
         <Select
           label="Current Round"
           value={currentRound}

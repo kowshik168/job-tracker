@@ -57,12 +57,15 @@ model Application {
   source           Source?
   referral         String?
   resumeType       ResumeType
+  resumeId         String?
+  resume           Resume?           @relation(fields: [resumeId], references: [id], onDelete: SetNull)
   status           ApplicationStatus @default(SAVED)
   currentRound     CurrentRound      @default(NONE)
   recruiterName    String?
   recruiterContact String?
   followUpDate     DateTime?
   notes            String?
+  learnings        ResumeLearning[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -70,5 +73,36 @@ model Application {
   @@index([appliedAt])
   @@index([followUpDate])
   @@index([company])
+  @@index([resumeId])
   @@map("applications")
+}
+
+model Resume {
+  id           String           @id @default(cuid())
+  name         String
+  resumeType   ResumeType
+  fileName     String
+  mimeType     String
+  fileSize     Int
+  data         Bytes
+  notes        String?
+  applications Application[]
+  learnings    ResumeLearning[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("resumes")
+}
+
+model ResumeLearning {
+  id             String        @id @default(cuid())
+  content        String
+  resumeId       String
+  resume         Resume        @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  applicationId  String?
+  application    Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+
+  @@index([resumeId])
+  @@map("resume_learnings")
 }

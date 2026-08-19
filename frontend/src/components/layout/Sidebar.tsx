@@ -8,6 +8,7 @@ import {
   X,
   Plus,
   LogOut,
+  FileText,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
@@ -18,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/applications', label: 'Applications', icon: Briefcase },
+  { to: '/resumes', label: 'Resumes', icon: FileText },
   { to: '/follow-ups', label: 'Follow-ups', icon: Bell },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];

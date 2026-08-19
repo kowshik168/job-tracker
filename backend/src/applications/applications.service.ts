@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -7,9 +7,28 @@ import {
 } from './dto/application.dto';
 import { QueryApplicationsDto } from './dto/query-applications.dto';
 
+const resumeSelect = {
+  id: true,
+  name: true,
+  resumeType: true,
+  fileName: true,
+  fileSize: true,
+} as const;
+
 @Injectable()
 export class ApplicationsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async resolveResume(resumeId?: string | null) {
+    if (!resumeId) return null;
+    const resume = await this.prisma.resume.findUnique({
+      where: { id: resumeId },
+    });
+    if (!resume) {
+      throw new BadRequestException('Selected resume was not found');
+    }
+    return resume;
+  }
 
   async findAll(query: QueryApplicationsDto) {
     const {
@@ -49,6 +68,7 @@ export class ApplicationsService {
         orderBy,
         skip,
         take: limit,
+        include: { resume: { select: resumeSelect } },
       }),
       this.prisma.application.count({ where }),
     ]);
@@ -67,6 +87,7 @@ export class ApplicationsService {
   async findOne(id: string) {
     const application = await this.prisma.application.findUnique({
       where: { id },
+      include: { resume: { select: resumeSelect } },
     });
 
     if (!application) {
@@ -77,6 +98,8 @@ export class ApplicationsService {
   }
 
   async create(dto: CreateApplicationDto) {
+    const resume = await this.resolveResume(dto.resumeId);
+
     return this.prisma.application.create({
       data: {
         company: dto.company,
@@ -85,7 +108,8 @@ export class ApplicationsService {
         appliedAt: new Date(dto.appliedAt),
         source: dto.source,
         referral: dto.referral,
-        resumeType: dto.resumeType,
+        resumeType: resume?.resumeType ?? dto.resumeType,
+        resumeId: resume?.id,
         status: dto.status,
         currentRound: dto.currentRound ?? 'NONE',
         recruiterName: dto.recruiterName,
@@ -93,6 +117,7 @@ export class ApplicationsService {
         followUpDate: dto.followUpDate ? new Date(dto.followUpDate) : null,
         notes: dto.notes,
       },
+      include: { resume: { select: resumeSelect } },
     });
   }
 
@@ -108,6 +133,15 @@ export class ApplicationsService {
     if (dto.source !== undefined) data.source = dto.source;
     if (dto.referral !== undefined) data.referral = dto.referral;
     if (dto.resumeType !== undefined) data.resumeType = dto.resumeType;
+    if (dto.resumeId !== undefined) {
+      if (dto.resumeId === null || dto.resumeId === '') {
+        data.resume = { disconnect: true };
+      } else {
+        const resume = await this.resolveResume(dto.resumeId);
+        data.resume = { connect: { id: resume!.id } };
+        data.resumeType = resume!.resumeType;
+      }
+    }
     if (dto.status !== undefined) data.status = dto.status;
     if (dto.currentRound !== undefined) data.currentRound = dto.currentRound;
     if (dto.recruiterName !== undefined) data.recruiterName = dto.recruiterName;
@@ -122,6 +156,7 @@ export class ApplicationsService {
     return this.prisma.application.update({
       where: { id },
       data,
+      include: { resume: { select: resumeSelect } },
     });
   }
 

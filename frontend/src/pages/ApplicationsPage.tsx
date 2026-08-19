@@ -211,7 +211,7 @@ export function ApplicationsPage() {
                       Role
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-slate-600 hidden md:table-cell">
-                      Resume Type
+                      Resume
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-slate-600">
                       Applied
@@ -246,7 +246,7 @@ export function ApplicationsPage() {
                       </td>
                       <td className="px-4 py-3 text-slate-700">{app.role}</td>
                       <td className="px-4 py-3 text-slate-600 hidden md:table-cell">
-                        {RESUME_TYPE_LABELS[app.resumeType]}
+                        {app.resume?.name ?? RESUME_TYPE_LABELS[app.resumeType]}
                       </td>
                       <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                         {formatDate(app.appliedAt)}

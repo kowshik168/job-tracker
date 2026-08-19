@@ -35,6 +35,47 @@ export type CurrentRound =
   | 'FINAL'
   | 'OTHER';
 
+export interface ResumeSummary {
+  id: string;
+  name: string;
+  resumeType: ResumeType;
+  fileName: string;
+  fileSize: number;
+}
+
+export interface ResumeLearning {
+  id: string;
+  content: string;
+  resumeId: string;
+  applicationId: string | null;
+  createdAt: string;
+  application?: {
+    id: string;
+    company: string;
+    role: string;
+    status: ApplicationStatus;
+  } | null;
+}
+
+export interface Resume extends ResumeSummary {
+  mimeType: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    applications: number;
+    learnings: number;
+  };
+  applications?: {
+    id: string;
+    company: string;
+    role: string;
+    status: ApplicationStatus;
+    appliedAt: string;
+  }[];
+  learnings?: ResumeLearning[];
+}
+
 export interface Application {
   id: string;
   company: string;
@@ -44,6 +85,8 @@ export interface Application {
   source: Source | null;
   referral: string | null;
   resumeType: ResumeType;
+  resumeId: string | null;
+  resume: ResumeSummary | null;
   status: ApplicationStatus;
   currentRound: CurrentRound;
   recruiterName: string | null;
@@ -62,6 +105,7 @@ export interface CreateApplicationInput {
   source?: Source;
   referral?: string;
   resumeType: ResumeType;
+  resumeId?: string;
   status: ApplicationStatus;
   currentRound?: CurrentRound;
   recruiterName?: string;
