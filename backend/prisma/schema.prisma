@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResumeType {
+  BACKEND_SDE
+  SRE_DEVOPS
+  GENERAL_SWE
+  OTHER
+}
+
+enum Source {
+  LINKEDIN
+  COMPANY_WEBSITE
+  REFERRAL
+  WELLFOUND
+  NAUKRI
+  INSTAHYRE
+  OTHER
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  OA
+  RECRUITER_SCREEN
+  INTERVIEW
+  OFFER
+  REJECTED
+  ON_HOLD
+}
+
+enum CurrentRound {
+  NONE
+  OA
+  RECRUITER_SCREEN
+  TECHNICAL_ROUND_1
+  TECHNICAL_ROUND_2
+  SYSTEM_DESIGN
+  MANAGERIAL
+  HR
+  FINAL
+  OTHER
+}
+
+model Application {
+  id               String            @id @default(cuid())
+  company          String
+  role             String
+  jobUrl           String?
+  appliedAt        DateTime
+  source           Source?
+  referral         String?
+  resumeType       ResumeType
+  status           ApplicationStatus @default(SAVED)
+  currentRound     CurrentRound      @default(NONE)
+  recruiterName    String?
+  recruiterContact String?
+  followUpDate     DateTime?
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([status])
+  @@index([appliedAt])
+  @@index([followUpDate])
+  @@index([company])
+  @@map("applications")
+}
