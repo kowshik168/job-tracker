@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Textarea } from '../ui/Textarea';
@@ -14,8 +13,9 @@ import {
   STATUS_LABELS,
   CURRENT_ROUND_LABELS,
 } from '../../lib/constants';
-import { toDateInputValue } from '../../lib/utils';
-import { getResumes } from '../../api/resumes';
+import { cn, toDateInputValue } from '../../lib/utils';
+import { getErrorMessage } from '../../lib/errors';
+import { getResumes, uploadResume } from '../../api/resumes';
 import type {
   Application,
   ApplicationStatus,
@@ -51,6 +51,10 @@ export function ApplicationForm({
   const [referral, setReferral] = useState(initial?.referral ?? '');
   const [resumeType, setResumeType] = useState(initial?.resumeType ?? '');
   const [resumeId, setResumeId] = useState(initial?.resumeId ?? initial?.resume?.id ?? '');
+  const [resumeMode, setResumeMode] = useState<'upload' | 'existing'>(
+    initial?.resumeId ? 'existing' : 'upload',
+  );
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [status, setStatus] = useState<ApplicationStatus>(
     initial?.status ?? 'APPLIED',
@@ -80,6 +84,12 @@ export function ApplicationForm({
     if (!appliedAt) newErrors.appliedAt = 'Applied date is required';
     if (!resumeType) newErrors.resumeType = 'Resume type is required';
     if (!status) newErrors.status = 'Status is required';
+    const hasResume = Boolean(
+      resumeFile || resumeId || initial?.resumeId || initial?.resume?.id,
+    );
+    if (!hasResume) {
+      newErrors.resume = 'Attach the resume you sent this company';
+    }
     if (jobUrl && !/^https?:\/\/.+/.test(jobUrl)) {
       newErrors.jobUrl = 'Must be a valid URL';
     }
@@ -93,12 +103,28 @@ export function ApplicationForm({
 
     setLoading(true);
     try {
+      let attachedResumeId =
+        resumeId || initial?.resumeId || initial?.resume?.id || undefined;
+
+      if (resumeMode === 'upload' && resumeFile) {
+        const formData = new FormData();
+        formData.append('file', resumeFile);
+        const autoName = [company.trim(), role.trim()].filter(Boolean).join(' — ');
+        formData.append('name', autoName || resumeFile.name);
+        formData.append(
+          'resumeType',
+          (resumeType as ResumeType) || 'GENERAL_SWE',
+        );
+        const uploaded = await uploadResume(formData);
+        attachedResumeId = uploaded.id;
+      }
+
       const data: CreateApplicationInput = {
         company: company.trim(),
         role: role.trim(),
         appliedAt,
         resumeType: resumeType as CreateApplicationInput['resumeType'],
-        resumeId: resumeId || undefined,
+        resumeId: attachedResumeId,
         status: status as CreateApplicationInput['status'],
         currentRound: currentRound as CreateApplicationInput['currentRound'],
         jobUrl: jobUrl.trim() || undefined,
@@ -110,6 +136,11 @@ export function ApplicationForm({
         notes: notes.trim() || undefined,
       };
       await onSubmit(data);
+    } catch (err) {
+      setErrors((prev) => ({
+        ...prev,
+        resume: getErrorMessage(err, 'Could not attach that resume.'),
+      }));
     } finally {
       setLoading(false);
     }
@@ -154,21 +185,6 @@ export function ApplicationForm({
           }))}
         />
         <Select
-          label="Stored resume"
-          value={resumeId}
-          onChange={(e) => {
-            const nextId = e.target.value;
-            setResumeId(nextId);
-            const selected = resumes.find((r) => r.id === nextId);
-            if (selected) setResumeType(selected.resumeType);
-          }}
-          placeholder="None — type only"
-          options={resumes.map((r) => ({
-            value: r.id,
-            label: `${r.name} (${RESUME_TYPE_LABELS[r.resumeType]})`,
-          }))}
-        />
-        <Select
           label="Resume Type"
           value={resumeType}
           onChange={(e) => setResumeType(e.target.value as ResumeType)}
@@ -180,15 +196,6 @@ export function ApplicationForm({
             label: RESUME_TYPE_LABELS[r],
           }))}
         />
-        {resumes.length === 0 && (
-          <p className="sm:col-span-2 -mt-3 text-xs text-slate-500">
-            No stored resumes yet.{' '}
-            <Link to="/resumes" className="text-blue-600 hover:text-blue-700">
-              Upload one
-            </Link>{' '}
-            to attach the exact file you applied with.
-          </p>
-        )}
         <Select
           label="Current Round"
           value={currentRound}
@@ -239,6 +246,91 @@ export function ApplicationForm({
           onChange={(e) => setRecruiterContact(e.target.value)}
           placeholder="email or phone"
         />
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-raised p-4 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Resume sent to this company
+          </h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Tailor a file per company if you want — when they call, you can
+            open the exact PDF you submitted.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setResumeMode('upload');
+              setResumeId('');
+            }}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-sm font-medium border',
+              resumeMode === 'upload'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-surface text-slate-700 border-slate-200',
+            )}
+          >
+            Upload for this company
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setResumeMode('existing');
+              setResumeFile(null);
+            }}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-sm font-medium border',
+              resumeMode === 'existing'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-surface text-slate-700 border-slate-200',
+            )}
+          >
+            Reuse a saved resume
+          </button>
+        </div>
+
+        {resumeMode === 'upload' ? (
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-slate-700">
+              File <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)}
+              className="w-full rounded-lg border border-slate-200 bg-surface px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-slate-400">
+              PDF or Word, up to 5 MB. Saved as “{company || 'Company'} —{' '}
+              {role || 'Role'}”.
+            </p>
+            {initial?.resume && !resumeFile && (
+              <p className="text-xs text-slate-600">
+                Currently attached: {initial.resume.name}
+              </p>
+            )}
+          </div>
+        ) : (
+          <Select
+            label="Saved resume"
+            value={resumeId}
+            onChange={(e) => {
+              const nextId = e.target.value;
+              setResumeId(nextId);
+              const selected = resumes.find((r) => r.id === nextId);
+              if (selected) setResumeType(selected.resumeType);
+            }}
+            placeholder="Select the file you submitted"
+            options={resumes.map((r) => ({
+              value: r.id,
+              label: `${r.name} (${RESUME_TYPE_LABELS[r.resumeType]})`,
+            }))}
+          />
+        )}
+        {errors.resume && <p className="text-xs text-red-600">{errors.resume}</p>}
       </div>
 
       <Textarea

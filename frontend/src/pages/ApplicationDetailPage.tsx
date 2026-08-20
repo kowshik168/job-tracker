@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
+  Download,
   ExternalLink,
+  FileText,
   Pencil,
   Trash2,
 } from 'lucide-react';
@@ -11,7 +13,7 @@ import {
   updateApplication,
   deleteApplication,
 } from '../api/applications';
-import { addResumeLearning } from '../api/resumes';
+import { addResumeLearning, downloadResumeFile } from '../api/resumes';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
@@ -178,6 +180,23 @@ export function ApplicationDetailPage() {
             Edit
           </Button>
         </Link>
+        {application.resume && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              downloadResumeFile(application.resume!.id).catch((err) =>
+                showToast(
+                  getErrorMessage(err, 'Could not download that resume.'),
+                  'error',
+                ),
+              )
+            }
+          >
+            <Download className="h-4 w-4" />
+            Download resume
+          </Button>
+        )}
         {application.jobUrl && (
           <a href={application.jobUrl} target="_blank" rel="noopener noreferrer">
             <Button variant="secondary" size="sm">
@@ -266,6 +285,57 @@ export function ApplicationDetailPage() {
         </div>
 
         <div className="space-y-4">
+          <div className="rounded-xl border border-slate-200 bg-surface p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Resume for this company
+            </h2>
+            {application.resume ? (
+              <>
+                <p className="text-sm font-medium text-slate-900">
+                  {application.resume.name}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {application.resume.fileName} ·{' '}
+                  {RESUME_TYPE_LABELS[application.resume.resumeType]}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() =>
+                      downloadResumeFile(application.resume!.id).catch((err) =>
+                        showToast(
+                          getErrorMessage(err, 'Could not download that resume.'),
+                          'error',
+                        ),
+                      )
+                    }
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </Button>
+                  <Link to={`/resumes/${application.resume.id}`}>
+                    <Button size="sm" variant="ghost">
+                      Open resume
+                    </Button>
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-slate-500">
+                None attached.{' '}
+                <Link
+                  to={`/applications/${application.id}/edit`}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  Edit
+                </Link>{' '}
+                to upload the file you sent them.
+              </p>
+            )}
+          </div>
+
           <div className="rounded-xl border border-slate-200 bg-surface p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900">
               Quick Actions
